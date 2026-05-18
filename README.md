@@ -13,11 +13,12 @@
 1. **P1** **MCP + agents stack** — Anthropic MCP courses, Microsoft MCP for Beginners, OpenAI Agents SDK, Claude API course  
 2. **P1** **Cursor agentic workflow** — Cursor Learn (agents, rules, MCP) + Claude Code in Action  
 3. **P1** NVIDIA Building RAG Agents with LLMs + Hugging Face AI Agents Course  
-4. **P1** Databricks Gen AI / Prompt Engineering / AI Agent Fundamentals (quick badges)  
-5. **P1** **Advanced Python** — FastAPI inference API + OpenAI/Anthropic Python SDKs (cookbooks)  
-6. **P2** Google Generative AI Leader path → sit exam · AWS Certified AI Practitioner prep → sit exam  
-7. **P2** Portfolio: one public RAG or **MCP server** + agent (FastAPI + vector DB)  
-8. **P3** Fine-tuning (Hugging Face smol-course), local inference (Ollama/vLLM), MLOps, OWASP LLM
+4. **P2** **LangChain & LangGraph** — [LangChain Academy](https://academy.langchain.com/) (Intro to LangChain → Intro to LangGraph → LangSmith; all free)  
+5. **P1** Databricks Gen AI / Prompt Engineering / AI Agent Fundamentals (quick badges)  
+6. **P1** **Advanced Python** — FastAPI inference API + OpenAI/Anthropic Python SDKs (cookbooks)  
+7. **P2** Google Generative AI Leader path → sit exam · AWS Certified AI Practitioner prep → sit exam  
+8. **P2** Portfolio: one public RAG or **MCP server** + agent (FastAPI + vector DB; optional LangGraph orchestration)  
+9. **P3** Fine-tuning (Hugging Face smol-course), local inference (Ollama/vLLM), MLOps, OWASP LLM
 
 ---
 
@@ -129,6 +130,34 @@
 
 ---
 
+## LangChain & LangGraph
+
+*Official training from the LangChain team ([LangChain Academy](https://academy.langchain.com/)) — free courses with completion certificates; kept current as the framework evolves. LangGraph is the orchestration layer for multi-step and multi-agent workflows; LangSmith covers observability and evals.*
+
+| Resource | Hours | Cert | Priority | URL |
+|----------|------:|:----:|:--------:|-----|
+| LangChain Academy (course catalog) | path | — | P1 | https://academy.langchain.com/ |
+| Foundation: Introduction to LangChain — Python | ~6 | yes | P2 | https://academy.langchain.com/courses/foundation-introduction-to-langchain-python |
+| Quickstart: LangChain Essentials — Python | 1 | — | P2 | https://academy.langchain.com/courses/langchain-essentials-python |
+| Foundation: Introduction to LangGraph — Python | 6 | yes | P2 | https://academy.langchain.com/courses/intro-to-langgraph |
+| Quickstart: LangGraph Essentials — Python | 1 | — | P2 | https://academy.langchain.com/courses/langgraph-essentials-python |
+| Foundation: Introduction to Agent Observability & Evaluations (LangSmith) | — | yes | P2 | https://academy.langchain.com/courses/intro-to-langsmith |
+| Quickstart: LangSmith Essentials | — | — | P2 | https://academy.langchain.com/courses/quickstart-langsmith-essentials |
+| Foundation: Building Reliable Agents (LangSmith) | — | yes | P2 | https://academy.langchain.com/courses/building-reliable-agents |
+| Foundation: Monitoring Production Agents | — | yes | P3 | https://academy.langchain.com/courses/production-monitoring |
+| Project: Deep Agents with LangGraph | — | — | P3 | https://academy.langchain.com/courses/deep-agents-with-langgraph |
+| Quickstart: LangChain Essentials — TypeScript | 1 | — | P3 | https://academy.langchain.com/courses/quickstart-langchain-essentials-typescript |
+| LangChain Python documentation | — | — | P2 | https://python.langchain.com/docs/introduction/ |
+| LangGraph documentation | — | — | P2 | https://langchain-ai.github.io/langgraph/ |
+| LangSmith documentation (evals & tracing) | — | — | P2 | https://docs.smith.langchain.com/ |
+| LangChain for LLM Application Development (DeepLearning.AI / Coursera) | — | audit | P2 | https://www.coursera.org/learn/langchain |
+| LangChain: Chat with Your Data (DeepLearning.AI / Coursera) | — | audit | P2 | https://www.coursera.org/learn/langchain-chat-with-your-data |
+| Agentic AI with LangChain and LangGraph (Coursera) | — | audit | P2 | https://www.coursera.org/learn/agentic-ai-with-langchain-and-langgraph |
+
+*Suggested order on Academy:* Intro to LangChain → LangGraph Essentials or Intro to LangGraph → Intro to LangSmith → Building Reliable Agents → Monitoring Production Agents.
+
+---
+
 ## Advanced Python for AI developers
 
 *Assumes strong Python; focuses on production LLM apps, APIs, and agents.*
@@ -137,8 +166,6 @@
 |----------|------:|:----:|:--------:|-----|
 | FastAPI documentation | — | — | P1 | https://fastapi.tiangolo.com/ |
 | Pydantic AI — agent framework (Python) | — | — | P2 | https://ai.pydantic.dev/ |
-| LangGraph documentation (agent orchestration) | — | — | P2 | https://langchain-ai.github.io/langgraph/ |
-| LangChain Python docs | — | — | P2 | https://python.langchain.com/docs/introduction/ |
 | Local LLM API with FastAPI + Ollama (lab) | — | — | P2 | https://docs.teknolabs.net/courses/advanced-python/9-llm-access-fastapi-ollama/ |
 | Generative AI Course — notebooks + FastAPI inference (GitHub) | — | — | P2 | https://github.com/ruslanmv/Generative-AI-Course |
 | OpenAI Cookbook — Agents SDK examples | — | — | P1 | https://developers.openai.com/cookbook/topic/agents |
@@ -227,12 +254,7 @@ Full path: https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/
 
 ## DeepLearning.AI (Coursera — audit free; cert paid unless Coursera Plus)
 
-| Course | Hours | Cert | Priority | URL |
-|--------|------:|:----:|:--------:|-----|
-| LangChain for LLM Application Development | — | audit | P2 | https://www.coursera.org/learn/langchain |
-| LangChain: Chat with Your Data | — | audit | P2 | https://www.coursera.org/learn/langchain-chat-with-your-data |
-
-*OpenAI API prompt/system courses are under **OpenAI Platform**; Generative AI with LLMs is under **LLM fundamentals**.*
+*LangChain Coursera courses are listed under **LangChain & LangGraph**. OpenAI API prompt/system courses are under **OpenAI Platform**; Generative AI with LLMs is under **LLM fundamentals**.*
 
 ---
 
@@ -262,7 +284,7 @@ Full path: https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/
 | Topic | Priority | URL |
 |-------|:--------:|-----|
 | OWASP Top 10 for LLM Applications | P2 | https://owasp.org/www-project-top-10-for-large-language-model-applications/ |
-| LangSmith evals & observability | P3 | https://docs.smith.langchain.com/ |
+| LangSmith evals & observability | P2 | https://docs.smith.langchain.com/ |
 | Pinecone Learning Center (vector search) | P3 | https://www.pinecone.io/learn/ |
 | Weaviate Academy | P3 | https://weaviate.io/developers/academy |
 | Ollama — local LLM inference | P3 | https://github.com/ollama/ollama |
@@ -278,6 +300,7 @@ Full path: https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/
 | Databricks badges | Databricks | free | Gen AI, Prompt Engineering, AI Agent Fundamentals |
 | NVIDIA DLI certificates | NVIDIA | free | Building RAG Agents with LLMs |
 | Hugging Face course certificate | Hugging Face | free | AI Agents Course |
+| LangChain Academy completion certificates | LangChain | free | Intro to LangChain; Intro to LangGraph; LangSmith courses |
 | Anthropic MCP + Claude API courses | Anthropic | free | Introduction to MCP; Building with the Claude API |
 | OpenAI Agents SDK proficiency | OpenAI | free (docs) | Agents SDK guides + Cookbook |
 
@@ -290,4 +313,5 @@ Full path: https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/
 | Cursor / Claude Code | Cursor Learn, Claude Code in Action, rules + MCP docs |
 | LLM APIs | Building with Claude API, OpenAI Cookbook, Python SDKs |
 | Inference & gateways | FastAPI + Ollama lab, Hugging Face LLM course, vLLM/Ollama docs |
-| Advanced Python | FastAPI, asyncio, LangGraph/Pydantic AI, cookbook notebooks |
+| LangChain / LangGraph | LangChain Academy (Intro to LangChain, LangGraph, LangSmith); official Python docs |
+| Advanced Python | FastAPI, asyncio, Pydantic AI, cookbook notebooks |
