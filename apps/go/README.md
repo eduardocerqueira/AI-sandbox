@@ -7,6 +7,7 @@ Small CLIs, HTTP gateways, or performance experiments. Typical pattern: call LLM
 | Project | Description |
 |---------|-------------|
 | [hf-inference-hello](hf-inference-hello/) | HF Inference API sentiment CLI (stdlib) |
+| [hf-sentiment-server](hf-sentiment-server/) | HTTP `POST /v1/sentiment` wrapper around the same API |
 
 ## New project
 

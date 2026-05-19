@@ -62,6 +62,6 @@ export HF_TOKEN=hf_...   # this app reads HF_TOKEN from the environment
 
 ## Next steps
 
-- Add a small `net/http` server that exposes `POST /sentiment`
+- Continue with [hf-sentiment-server](../hf-sentiment-server/) (HTTP API)
 - Try a text-generation model with a different request body
 - New app: `apps/go/hf-hub-cli` to list Hub models (like your Python Hub tool)
