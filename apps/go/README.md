@@ -1,6 +1,12 @@
 # Go apps
 
-Small CLIs, HTTP gateways, or performance experiments. Less common for notebook-style ML, but useful for services and tooling.
+Small CLIs, HTTP gateways, or performance experiments. Typical pattern: call LLM/ML **APIs** from Go (no in-process PyTorch).
+
+## Projects
+
+| Project | Description |
+|---------|-------------|
+| [hf-inference-hello](hf-inference-hello/) | HF Inference API sentiment CLI (stdlib) |
 
 ## New project
 

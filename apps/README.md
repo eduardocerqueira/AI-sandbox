@@ -17,6 +17,7 @@ Each subdirectory is a **language workspace**. Projects are sibling folders insi
 | `python/hf-pipeline-hello` | Hugging Face `transformers` sentiment pipeline on sample text |
 | `python/hf-smolagent-intro` | smolagents agent, Hub + learning-path tools, optional Gradio UI |
 | `python/hf-agents-lab` | Multi-tool agents lab + calculator + example prompts |
+| `go/hf-inference-hello` | HF Inference API sentiment CLI (stdlib `net/http`) |
 
 ## Creating a project
 
