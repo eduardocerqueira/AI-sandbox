@@ -12,15 +12,11 @@ Each subdirectory is a **language workspace**. Projects are sibling folders insi
 
 ## Current projects
 
-_None yet — copy a `_template` folder to start._
-
-When you add an app, list it here:
-
-```markdown
 | Project | Description |
 |---------|-------------|
-| `python/my-app` | One-line summary |
-```
+| `python/hf-pipeline-hello` | Hugging Face `transformers` sentiment pipeline on sample text |
+| `python/hf-smolagent-intro` | smolagents agent, Hub + learning-path tools, optional Gradio UI |
+| `python/hf-agents-lab` | Multi-tool agents lab + calculator + example prompts |
 
 ## Creating a project
 

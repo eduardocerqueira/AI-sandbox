@@ -12,7 +12,9 @@ Starter themes aligned with the [learning resources](learning-resources.md) cata
 
 ## Example project names
 
-- `apps/python/hf-agents-lab`
+- `apps/python/hf-pipeline-hello` ✓
+- `apps/python/hf-smolagent-intro` ✓
+- `apps/python/hf-agents-lab` ✓
 - `apps/typescript/mcp-filesystem`
 - `apps/python/fastapi-ollama-rag`
 

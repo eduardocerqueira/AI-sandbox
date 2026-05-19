@@ -1,0 +1,33 @@
+[project]
+name = "hf-smolagent-intro"
+version = "0.1.0"
+description = "Hugging Face smolagents CodeAgent with a custom Hub lookup tool"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "smolagents>=1.24",
+  "huggingface-hub>=0.23",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.4"]
+ui = ["gradio>=5.0"]
+
+[project.scripts]
+hf-smolagent-intro = "hf_smolagent_intro:main"
+hf-smolagent-gradio = "hf_smolagent_intro.gradio_ui:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hf_smolagent_intro"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
