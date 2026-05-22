@@ -10,8 +10,10 @@ on:
     types: [completed]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
+  issues: read
+  actions: write
 
 concurrency:
   group: pr-bot-${{ github.event.workflow_run.pull_requests[0].number || github.run_id }}
@@ -27,8 +29,10 @@ jobs:
        github.event.workflow_run.conclusion != 'cancelled')
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      BOT_GH_TOKEN: ${{ secrets.BOT_GH_TOKEN || secrets.ISSUE_BOT_GH_TOKEN || secrets.TEST_BOT_GH_TOKEN || secrets.GITHUB_TOKEN }}
+      PR_BOT_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
     steps:
-      # Always run pr-bot from default branch — PR head may lack infra fixes.
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
@@ -39,10 +43,10 @@ jobs:
 
       - run: python -m pip install -e ./scripts/pr-bot
 
-      - name: Post steward comment on PR
+      - name: Steward review and automerge
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ env.BOT_GH_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}

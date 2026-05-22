@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from issue_bot.fix import fix_pull_request
 from issue_bot.implement import open_implementation_pr
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -19,6 +20,24 @@ LABEL_DONE = "agent-pr-opened"
 
 def _gh(args: list[str]) -> str:
     return subprocess.check_output(["gh", *args], cwd=REPO_ROOT, text=True)
+
+
+def _load_issue(repo: str, number: int) -> dict | None:
+    try:
+        raw = _gh(
+            [
+                "issue",
+                "view",
+                str(number),
+                "--repo",
+                repo,
+                "--json",
+                "number,title,body,labels,url",
+            ]
+        )
+        return json.loads(raw)
+    except subprocess.CalledProcessError:
+        return None
 
 
 def _pick_issue(repo: str) -> dict | None:
@@ -123,6 +142,23 @@ def main() -> None:
         action="store_true",
         help="Post plan comment only; do not generate a PR",
     )
+    parser.add_argument(
+        "--issue",
+        type=int,
+        default=None,
+        help="Process a specific issue number (for fix mode or manual runs)",
+    )
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Push a CI fix to the open issue-bot PR for --issue",
+    )
+    parser.add_argument(
+        "--pr",
+        type=int,
+        default=None,
+        help="PR number to fix (optional; inferred from issue branch)",
+    )
     args = parser.parse_args()
 
     repo = os.environ.get("GITHUB_REPOSITORY", "")
@@ -134,7 +170,18 @@ def main() -> None:
         print("[dry-run] would pick an agent-labeled issue, plan, and open PR")
         return
 
-    issue = _pick_issue(repo)
+    if args.fix:
+        if args.issue is None:
+            print("--fix requires --issue", file=sys.stderr)
+            sys.exit(1)
+        issue = _load_issue(repo, args.issue)
+        if not issue:
+            print(f"Issue #{args.issue} not found.", file=sys.stderr)
+            sys.exit(1)
+        ok = fix_pull_request(repo, issue, pr_number=args.pr, dry_run=args.dry_run)
+        sys.exit(0 if ok else 1)
+
+    issue = _load_issue(repo, args.issue) if args.issue else _pick_issue(repo)
     if not issue:
         print("No open agent issues to process.")
         return

@@ -7,6 +7,9 @@ dependencies = ["openai>=1.40.0"]
 [project.scripts]
 pr-bot = "pr_bot.main:main"
 
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

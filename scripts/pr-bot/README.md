@@ -1,17 +1,25 @@
 # PR steward
 
-Reviews **open pull requests** and posts a summary comment. Does **not** merge (by design).
+Reviews **open pull requests** and posts a summary comment. With the **`automerge`** label on the linked issue, can **squash-merge** when checks pass or **dispatch issue-bot** to fix CI failures.
 
 ## v1 behavior
 
-- **After PR Check finishes** on a PR (`workflow_run`): comments on **that PR only** — no maintainer approval (secrets are not exposed to untrusted `pull_request` runs).
+- **After PR Check finishes** on a PR (`workflow_run`): comments on **that PR** — steward + automerge logic when applicable.
 - **On schedule / manual run**: reviews up to 5 open PRs.
-- Posts a checklist comment: checks status, diff stat, optional OpenAI summary.
-- Skips if a steward comment already exists (`<!-- pr-bot:steward -->`).
+- Posts a checklist comment: checks status, diff stat, optional OpenAI summary (`<!-- pr-bot:steward -->`).
+- Skips duplicate steward comments unless the linked issue has **`automerge`** (then refreshes each run).
 
-## Auto-merge
+## Automerge (`automerge` issue label)
 
-**Not enabled.** Merging requires a human (or a future v2 with explicit `automerge` label + branch protection).
+Requires the PR body to include `Closes #<issue>` and the issue to have label **`automerge`** (in addition to **`agent`** for issue-bot PRs).
+
+| PR Check result | Action |
+|-----------------|--------|
+| All pass | Squash-merge PR, delete branch; issue closes via `Closes #n` |
+| Failure | Dispatch **Issue bot** fix workflow (up to **3** attempts) |
+| Pending | Wait for next PR Check completion |
+
+Uses **`BOT_GH_TOKEN`** (or legacy bot PAT secrets) for merge and workflow dispatch. Branch protection may still require the PAT account to be allowed to bypass or satisfy rules.
 
 ## Workflow
 

@@ -15,6 +15,8 @@ Skips issues that already have an open `issue-bot/*` PR.
 
 Create an issue, add label **`agent`**, and describe acceptance criteria and target files.
 
+Add **`automerge`** on the issue for the full loop: PR steward merges when **PR Check** passes, or dispatches **issue-bot** to fix CI (up to 3 attempts) and re-runs checks.
+
 Optional title prefix (no longer required for implementation):
 
 ```text
@@ -27,6 +29,9 @@ agent-fix: short description of the change
 |-----------------|--------|
 | `--dry-run` | Log only |
 | `--plan-only` | Plan comment; no PR |
+| `--issue N` | Target issue `N` (manual / workflow dispatch) |
+| `--fix` | Push CI fix to open `issue-bot/N-*` PR (`--issue` required) |
+| `--pr N` | PR to fix (optional with `--fix`) |
 | `ISSUE_BOT_SKIP_IMPLEMENT=1` | Plan only |
 | `ISSUE_BOT_PLAN_ONLY=1` | Plan only |
 | `ISSUE_BOT_MODEL` | OpenAI model (default `gpt-4o-mini`) |
