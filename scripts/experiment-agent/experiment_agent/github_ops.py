@@ -66,9 +66,20 @@ def has_active_run(repo: str) -> bool:
     return False
 
 
+def _issue_number_from_url(url: str) -> int:
+    """Parse issue number from `gh issue create` URL output."""
+    path = url.strip().rstrip("/")
+    if not path:
+        raise ValueError("empty issue URL from gh issue create")
+    number = path.split("/")[-1]
+    if not number.isdigit():
+        raise ValueError(f"could not parse issue number from: {url!r}")
+    return int(number)
+
+
 def create_proposal_issue(repo: str, title: str, body: str) -> int:
     full_title = title if title.startswith(ISSUE_TITLE_PREFIX) else f"{ISSUE_TITLE_PREFIX} {title}"
-    raw = _gh(
+    url = _gh(
         [
             "issue",
             "create",
@@ -82,12 +93,9 @@ def create_proposal_issue(repo: str, title: str, body: str) -> int:
             LABEL_EXPERIMENT,
             "--label",
             LABEL_PROGRESS,
-            "--json",
-            "number",
         ]
     )
-    data = json.loads(raw)
-    return int(data["number"])
+    return _issue_number_from_url(url)
 
 
 def comment_issue(repo: str, issue_number: int, body: str) -> None:
