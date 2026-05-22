@@ -1,0 +1,107 @@
+# Runs on every pull request and on pushes to the default branch.
+name: PR Check
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: pr-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python · ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - hf-pipeline-hello
+          - hf-smolagent-intro
+          - hf-agents-lab
+          - hf-qa-rag
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: apps/python/${{ matrix.app }}/pyproject.toml
+
+      - name: Install and test
+        working-directory: apps/python/${{ matrix.app }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pytest -q
+
+  node:
+    name: Node · ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - hf-inference-hello
+          - hf-qa-rag-api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/node/${{ matrix.app }}/package-lock.json
+
+      - name: Install and test
+        working-directory: apps/node/${{ matrix.app }}
+        run: |
+          npm ci
+          npm test
+
+  go:
+    name: Go · ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - hf-inference-hello
+          - hf-sentiment-server
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: apps/go/${{ matrix.app }}/go.mod
+
+      - name: Test
+        working-directory: apps/go/${{ matrix.app }}
+        run: go test ./...
+
+  typescript:
+    name: TypeScript · hf-qa-rag-ui
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/typescript/hf-qa-rag-ui/package-lock.json
+
+      - name: Install, lint, and build
+        working-directory: apps/typescript/hf-qa-rag-ui
+        run: |
+          npm ci
+          npm run lint
+          npm run build
