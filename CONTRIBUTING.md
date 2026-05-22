@@ -11,7 +11,7 @@ GitHub Actions run on every PR ([`.github/workflows/pr-check.yml`](.github/workf
 
 **Test bot** ([`scripts/test-bot/README.md`](scripts/test-bot/README.md)) runs weekly or on demand ([`.github/workflows/test-bot.yml`](.github/workflows/test-bot.yml)): it discovers files without tests, generates them via OpenAI, runs app test suites, and opens a PR. Requires the `OPENAI_API_KEY` repository secret.
 
-**Scheduled agents** (docs-bot, CVE scan, issue-bot, pr-bot, test-bot, experiment-agent): overview, cron schedules, and setup in [docs/agents.md](docs/agents.md). Issue bot triages issues labeled `agent` (plan comment; v2 auto-PR in [PR #6](https://github.com/eduardocerqueira/AI-sandbox/pull/6)).
+**Scheduled agents** (docs-bot, CVE scan, issue-bot, pr-bot, test-bot, experiment-agent): overview, cron schedules, and setup in [docs/agents.md](docs/agents.md). Issue bot (label `agent`) posts a plan and opens an implementation PR (v2).
 
 ## Adding a new app
 

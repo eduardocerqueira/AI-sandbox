@@ -8,7 +8,7 @@ Automation that runs **at least once per week** (staggered cron) or on demand. S
 |-------|----------|----------------|-----------|--------|
 | [Docs bot](../scripts/docs-bot/README.md) | [`docs-bot.yml`](../.github/workflows/docs-bot.yml) | Mon 08:00 | `OPENAI_API_KEY` | PR |
 | [CVE scan](../scripts/cve-scan/README.md) | [`cve-scan.yml`](../.github/workflows/cve-scan.yml) | Wed 08:00 | — | Issue (if HIGH/CRITICAL) |
-| [Issue worker](../scripts/issue-bot/README.md) | [`issue-bot.yml`](../.github/workflows/issue-bot.yml) | Fri 08:00 + label `agent` | `OPENAI_API_KEY` | Comment (plan) |
+| [Issue worker](../scripts/issue-bot/README.md) | [`issue-bot.yml`](../.github/workflows/issue-bot.yml) | Fri 08:00 + label `agent` | `OPENAI_API_KEY` | Plan + PR |
 | [PR steward](../scripts/pr-bot/README.md) | [`pr-bot.yml`](../.github/workflows/pr-bot.yml) | Sat 08:00 + after PR Check | `OPENAI_API_KEY` (optional) | Comment |
 | [Test bot](../scripts/test-bot/README.md) | [`test-bot.yml`](../.github/workflows/test-bot.yml) | Sun 07:00 | `OPENAI_API_KEY` | PR |
 | [Experiment agent](../scripts/experiment-agent/README.md) | [`experiment-agent.yml`](../.github/workflows/experiment-agent.yml) | Odd days 08:00 | `OPENAI_API_KEY` | Issue + PR |
@@ -33,11 +33,10 @@ Manual run: **Actions** → pick workflow → **Run workflow**.
 
 ### Issue worker
 
-- **Purpose:** Triage open issues labeled [`agent`](https://github.com/eduardocerqueira/AI-sandbox/issues?q=is%3Aissue+label%3Aagent) — posts a plan comment and adds `agent-in-progress`.
+- **Purpose:** Triage issues labeled [`agent`](https://github.com/eduardocerqueira/AI-sandbox/issues?q=is%3Aissue+label%3Aagent) — plan comment, then LLM implementation on `issue-bot/<n>-<slug>` and a PR.
 - **Script:** [`scripts/issue-bot/`](../scripts/issue-bot/README.md) · **Workflow:** [`.github/workflows/issue-bot.yml`](../.github/workflows/issue-bot.yml)
-- **Schedule:** Friday 08:00 UTC (`0 8 * * 5`) · **Trigger:** `issues` labeled `agent`, `workflow_dispatch`
-- **Secrets:** `OPENAI_API_KEY` (plan text; manual checklist if unset) · **Opens:** issue comment (implementation PR is manual in v1; see [PR #6](https://github.com/eduardocerqueira/AI-sandbox/pull/6) for v2)
-- **Next step after plan:** implement manually or open a PR linked to the issue (e.g. `Closes #4`).
+- **Schedule:** Friday 08:00 UTC (`0 8 * * 5`) · **Trigger:** `issues` labeled `agent`, `workflow_dispatch` (optional `plan_only`)
+- **Secrets:** `OPENAI_API_KEY`; optional `ISSUE_BOT_GH_TOKEN` for `gh pr create` · **Opens:** issue comments + PR (`Closes #n` on merge)
 
 ### PR steward
 
@@ -65,12 +64,12 @@ Manual run: **Actions** → pick workflow → **Run workflow**.
 | Step | Who |
 |------|-----|
 | 1. Open issue + label `agent` | You |
-| 2. Plan comment | **Issue worker** (issue-bot) |
-| 3. Implement + open PR | You (or Copilot); link `Closes #<n>` |
+| 2. Plan comment | **Issue worker** |
+| 3. Branch + implementation PR | **Issue worker** (v2) |
 | 4. PR Check + steward comment | **PR Check**, **PR steward** |
-| 5. Merge | You |
+| 5. Merge | You (closes issue via `Closes #n`) |
 
-**Experiment agent** and **test-bot** open their own PRs on a schedule without an `agent` issue.
+Use workflow input **`plan_only`** to get a plan without opening a PR. **Experiment agent** and **test-bot** open their own PRs on a schedule without an `agent` issue.
 
 ## Safety defaults
 
@@ -126,7 +125,7 @@ Bots do not chain automatically (test-bot does not wake docs-bot). Use schedules
 |------|------------|--------|
 | Update all docs from code | Partial | Docs bot syncs app catalog tables; deep rewrites need review |
 | CVE → issue | Yes | Trivy filesystem scan; dev dependency noise possible |
-| Fix issues end-to-end | Plan only (v1) | Issue bot comments a plan; implementation PR is manual until v2 merges |
+| Fix issues end-to-end | Best-effort (v2) | Issue bot opens PR; keep issues scoped to docs/small changes |
 | Review + merge PR | Review only | Comments and checklist; **you** merge |
 
 Hugging Face Jobs can run batch Python but do not replace GitHub for issues/PRs — keep orchestration in Actions.

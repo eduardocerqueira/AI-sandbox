@@ -1,4 +1,4 @@
-"""Triage and optionally work agent-labeled GitHub issues."""
+"""Triage agent-labeled issues, post a plan, and open an implementation PR (v2)."""
 
 from __future__ import annotations
 
@@ -9,10 +9,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+from issue_bot.implement import open_implementation_pr
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LABEL_AGENT = "agent"
 LABEL_PROGRESS = "agent-in-progress"
-FIX_PREFIX = "agent-fix:"
+LABEL_DONE = "agent-pr-opened"
 
 
 def _gh(args: list[str]) -> str:
@@ -39,10 +41,34 @@ def _pick_issue(repo: str) -> dict | None:
     issues = json.loads(raw)
     for issue in issues:
         labels = {lb["name"] for lb in issue.get("labels", [])}
-        if LABEL_PROGRESS in labels:
+        if LABEL_PROGRESS in labels or LABEL_DONE in labels:
             continue
         return issue
     return None
+
+
+def _has_open_bot_pr(repo: str, issue_number: int) -> bool:
+    prefix = f"issue-bot/{issue_number}-"
+    try:
+        raw = _gh(
+            [
+                "pr",
+                "list",
+                "--repo",
+                repo,
+                "--state",
+                "open",
+                "--json",
+                "headRefName",
+                "--limit",
+                "30",
+            ]
+        )
+        return any(
+            (pr.get("headRefName") or "").startswith(prefix) for pr in json.loads(raw)
+        )
+    except subprocess.CalledProcessError:
+        return False
 
 
 def _plan_comment(issue: dict) -> str:
@@ -82,51 +108,21 @@ def _plan_comment(issue: dict) -> str:
         ],
     )
     plan = (response.choices[0].message.content or "").strip()
-    return base + plan + "\n\n---\n_Automated by issue-bot v1 (plan only)._"
+    return base + plan + "\n\n---\n_Automated by issue-bot (plan + implementation PR)._"
 
 
-def _try_fix_pr(repo: str, issue: dict) -> None:
-    """Best-effort: only runs for agent-fix: titles; posts result comment."""
-    title = issue["title"]
-    if not title.lower().startswith(FIX_PREFIX):
-        return
-
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        _gh(
-            [
-                "issue",
-                "comment",
-                str(issue["number"]),
-                "--repo",
-                repo,
-                "--body",
-                "Skipping auto-fix: `OPENAI_API_KEY` not configured.",
-            ]
-        )
-        return
-
-    comment = (
-        f"Auto-fix for `{FIX_PREFIX}` issues is not fully implemented yet. "
-        f"Use the plan above, or run test-bot / open a PR manually.\n\n"
-        f"_Issue bot v1 — see [docs/agents.md](docs/agents.md)._"
-    )
-    _gh(
-        [
-            "issue",
-            "comment",
-            str(issue["number"]),
-            "--repo",
-            repo,
-            "--body",
-            comment,
-        ]
-    )
+def _comment(repo: str, number: int, body: str) -> None:
+    _gh(["issue", "comment", str(number), "--repo", repo, "--body", body])
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--plan-only",
+        action="store_true",
+        help="Post plan comment only; do not generate a PR",
+    )
     args = parser.parse_args()
 
     repo = os.environ.get("GITHUB_REPOSITORY", "")
@@ -135,7 +131,7 @@ def main() -> None:
         sys.exit(1)
 
     if args.dry_run:
-        print("[dry-run] would pick an agent-labeled issue and comment")
+        print("[dry-run] would pick an agent-labeled issue, plan, and open PR")
         return
 
     issue = _pick_issue(repo)
@@ -145,6 +141,10 @@ def main() -> None:
 
     number = issue["number"]
     print(f"Processing issue #{number}: {issue['title']}")
+
+    if _has_open_bot_pr(repo, number):
+        print(f"Skip #{number}: open issue-bot PR already exists")
+        return
 
     _gh(
         [
@@ -158,9 +158,41 @@ def main() -> None:
         ]
     )
 
-    body = _plan_comment(issue)
-    _gh(["issue", "comment", str(number), "--repo", repo, "--body", body])
-    _try_fix_pr(repo, issue)
+    plan = _plan_comment(issue)
+    _comment(repo, number, plan)
+
+    if args.plan_only or os.environ.get("ISSUE_BOT_PLAN_ONLY", "").lower() in {"1", "true"}:
+        print(f"Plan posted for #{number} (implementation skipped).")
+        return
+
+    result = open_implementation_pr(repo, issue, plan, dry_run=False)
+    if result:
+        _gh(
+            [
+                "issue",
+                "edit",
+                str(number),
+                "--repo",
+                repo,
+                "--add-label",
+                LABEL_DONE,
+            ]
+        )
+        follow = (
+            f"Opened implementation branch `{result}` for this issue.\n\n"
+            "A pull request should appear shortly (or was created by `gh pr create` locally).\n\n"
+            f"_Issue-bot v2 — closes #{number} when the PR merges._"
+        )
+        _comment(repo, number, follow)
+        print(f"Implementation pushed for #{number}")
+    else:
+        skip = (
+            "Could not auto-implement this issue (missing API key, invalid LLM output, "
+            "or disallowed paths). Use the plan above and open a PR manually.\n\n"
+            f"_Issue-bot v2 — see [docs/agents.md](docs/agents.md)._"
+        )
+        _comment(repo, number, skip)
+
     print(f"Updated issue #{number}")
 
 
