@@ -1,0 +1,49 @@
+# Close experiment-agent issues after their PR is merged.
+name: Experiment agent — close on merge
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  issues: write
+
+jobs:
+  close-linked-issues:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close experiment-agent issues linked in PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const { owner, repo } = context.repo;
+            const matches = [...body.matchAll(/closes\s+#(\d+)/gi)];
+            for (const match of matches) {
+              const issue_number = parseInt(match[1], 10);
+              const { data: issue } = await github.rest.issues.get({
+                owner,
+                repo,
+                issue_number,
+              });
+              const labels = issue.labels.map((l) =>
+                typeof l === "string" ? l : l.name
+              );
+              if (!labels.includes("experiment-agent")) continue;
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body:
+                  "Closed automatically after experiment-agent PR was merged.",
+              });
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number,
+                state: "closed",
+                state_reason: "completed",
+              });
+              core.info(`Closed #${issue_number}`);
+            }
