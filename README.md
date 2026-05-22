@@ -76,10 +76,15 @@ Learning AI tooling is easier with **working code you can grep**, not slide deck
 
 ```mermaid
 flowchart TD
-    A[Scheduled Bots] -->|Cron| B[PR Check]
-    A -->|Workflow Dispatch| C[PR Steward]
-    D[Triggers] -->|Scheduled| A
-    D -->|PR Triggered| B
-    D -->|Auto-Approve| C
-    E[For full details, see] --> F[Documentation]
+    A[Triggers] -->|Cron| B[docs-bot]
+    A -->|Workflow Dispatch| C[issue-bot]
+    A -->|PR Triggered| D[CVE scan]
+    A -->|Auto-Approve| E[PR steward]
+    B -->|PR Check| F[PR]
+    C -->|Plan| G[Implementation PR]
+    G -->|Review| H[Merge]
+    D -->|Scan| I[Issue]
+    E -->|Merge| J[PR]
 ```
+
+> For schedules, secrets, automerge, and per-agent behavior, see **[docs/agents.md](docs/agents.md)**.
