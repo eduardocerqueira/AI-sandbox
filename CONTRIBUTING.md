@@ -9,6 +9,8 @@ Agent skills (lockfile, `.agents/`): [docs/skills.md](docs/skills.md).
 
 GitHub Actions run on every PR ([`.github/workflows/pr-check.yml`](.github/workflows/pr-check.yml)) and nightly ([`.github/workflows/nightly.yml`](.github/workflows/nightly.yml)). When you add an app with tests, extend the matching job matrix in both workflows.
 
+**Test bot** ([`scripts/test-bot/README.md`](scripts/test-bot/README.md)) runs weekly or on demand ([`.github/workflows/test-bot.yml`](.github/workflows/test-bot.yml)): it discovers files without tests, generates them via OpenAI, runs app test suites, and opens a PR. Requires the `OPENAI_API_KEY` repository secret.
+
 ## Adding a new app
 
 1. **Choose a home** under `apps/<language>/` (or add a new top-level language folder if needed).
