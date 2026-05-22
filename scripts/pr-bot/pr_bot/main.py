@@ -1,4 +1,4 @@
-"""Post review-steward comments on open PRs (no auto-merge)."""
+"""Post review-steward comments; optional automerge when the linked issue has label automerge."""
 
 from __future__ import annotations
 
@@ -7,6 +7,13 @@ import json
 import os
 import subprocess
 from pathlib import Path
+
+from pr_bot.automerge import (
+    LABEL_AUTOMERGE,
+    closes_issue_number,
+    issue_has_automerge,
+    run_automerge,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BOT_MARKER = "<!-- pr-bot:steward -->"
@@ -107,10 +114,7 @@ def _ai_summary(title: str, body: str, diff_stat: str) -> str | None:
     return (response.choices[0].message.content or "").strip()
 
 
-def _build_comment(
-    repo: str,
-    pr: dict,
-) -> str:
+def _build_comment(repo: str, pr: dict) -> str:
     number = pr["number"]
     checks = _summarize_checks(repo, number)
     diff_stat = _diff_summary(repo, number)[:4000]
@@ -133,11 +137,22 @@ def _build_comment(
     ]
     if ai:
         parts.extend(["", "### Review notes", ai])
+
+    issue_num = closes_issue_number(pr.get("body"))
+    automerge = issue_num is not None and issue_has_automerge(repo, issue_num)
+    if automerge:
+        merge_line = (
+            f"**Automerge enabled** — issue #{issue_num} has `{LABEL_AUTOMERGE}`. "
+            "PR bot will squash-merge when all checks pass, or dispatch issue-bot to fix CI failures."
+        )
+    else:
+        merge_line = "Human merge only — add label `automerge` on the linked issue to enable auto-merge."
+
     parts.extend(
         [
             "",
             "### Merge",
-            "Human merge only — PR bot does not auto-merge.",
+            merge_line,
             "",
             "---",
             "_[pr-bot](scripts/pr-bot/README.md)_",
@@ -213,6 +228,11 @@ def main() -> None:
         default=None,
         help="Review a single PR number (overrides list; set from GITHUB_EVENT)",
     )
+    parser.add_argument(
+        "--automerge-only",
+        action="store_true",
+        help="Skip steward comment; only run automerge / fix dispatch",
+    )
     args = parser.parse_args()
 
     repo = os.environ.get("GITHUB_REPOSITORY", "")
@@ -243,12 +263,19 @@ def main() -> None:
 
     for pr in prs:
         n = pr["number"]
-        if _already_commented(repo, n):
+        issue_num = closes_issue_number(pr.get("body"))
+        automerge = issue_num is not None and issue_has_automerge(repo, issue_num)
+        if _already_commented(repo, n) and not automerge:
             print(f"Skip PR #{n} (steward comment exists)")
-            continue
-        comment = _build_comment(repo, pr)
-        _gh(["pr", "comment", str(n), "--repo", repo, "--body", comment])
-        print(f"Commented on PR #{n}")
+        else:
+            comment = _build_comment(repo, pr)
+            _gh(["pr", "comment", str(n), "--repo", repo, "--body", comment])
+            print(f"Commented on PR #{n}")
+
+        if args.automerge_only:
+            run_automerge(repo, n, pr.get("body"))
+        elif automerge:
+            run_automerge(repo, n, pr.get("body"))
 
 
 if __name__ == "__main__":

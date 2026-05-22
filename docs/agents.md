@@ -60,10 +60,10 @@ flowchart TD
 
 ### PR steward
 
-- **Purpose:** Post a review checklist on PRs — checks status, diff summary, optional OpenAI notes. **No auto-merge.**
+- **Purpose:** Post a review checklist on PRs; **auto-merge** when the linked issue has label **`automerge`** and checks pass; dispatch **issue-bot** fix on CI failure (up to 3 attempts).
 - **Script:** [`scripts/pr-bot/`](../scripts/pr-bot/README.md) · **Workflow:** [`.github/workflows/pr-bot.yml`](../.github/workflows/pr-bot.yml)
 - **Schedule:** Saturday 08:00 UTC (`0 8 * * 6`) · **Trigger:** after **PR Check** completes (`workflow_run`), `workflow_dispatch`
-- **Secrets:** `OPENAI_API_KEY` (optional summary) · **Opens:** PR comment (`<!-- pr-bot:steward -->`)
+- **Secrets:** `OPENAI_API_KEY` (optional); **`BOT_GH_TOKEN`** for merge + workflow dispatch · **Opens:** PR comment; may merge PR
 
 ### Test bot
 
@@ -83,17 +83,36 @@ flowchart TD
 
 | Step | Who |
 |------|-----|
-| 1. Open issue + label `agent` | You |
+| 1. Open issue + labels `agent` (+ optional `automerge`) | You |
 | 2. Plan comment | **Issue worker** |
 | 3. Branch + implementation PR | **Issue worker** (v2) |
 | 4. PR Check + steward comment | **PR Check**, **PR steward** |
-| 5. Merge | You (closes issue via `Closes #n`) |
+| 5. Merge | **You**, or **PR steward** if issue has **`automerge`** and checks pass |
 
 Use workflow input **`plan_only`** to get a plan without opening a PR. **Experiment agent** and **test-bot** open their own PRs on a schedule without an `agent` issue.
 
+## Automerge loop (`automerge` label)
+
+For issue-bot PRs whose body includes `Closes #<n>` and whose issue has label **`automerge`**:
+
+```mermaid
+flowchart LR
+  A[PR Check completes] --> B{Checks?}
+  B -->|pass| C[PR steward squash-merge]
+  B -->|fail| D{Attempts < 3?}
+  D -->|yes| E[Issue bot fix push]
+  D -->|no| F[Comment: manual needed]
+  E --> A
+  C --> G[Issue closed via Closes]
+```
+
+- **Fix mode:** PR steward dispatches **Issue bot** with `fix_mode` + `issue_number` (and optional `pr_number`).
+- **PAT:** merge and fix pushes use **`BOT_GH_TOKEN`** (same as other bots).
+- **Branch protection:** the PAT account may need bypass/merge rights if rules block bots.
+
 ## Safety defaults
 
-- **No auto-merge** in PR steward v1 — human merge only.
+- **Auto-merge** only when the linked issue has **`automerge`**; otherwise human merge.
 - **Issue worker** only picks issues with label [`agent`](https://github.com/eduardocerqueira/ai-sandbox/issues?q=is%3Aissue+label%3Aagent) (you add it).
 - **CVE scan** opens at most one tracking issue per run; skips if an open CVE issue already exists.
 - Bots use `github-actions[bot]` for git commits.
@@ -103,8 +122,8 @@ Use workflow input **`plan_only`** to get a plan without opening a PR. **Experim
 1. Enable Actions on the repo.
 2. Add repository secret **`OPENAI_API_KEY`** (docs, test, issue bots; optional for PR steward).
 3. Add **`BOT_GH_TOKEN`** — one fine-grained PAT for all bots that push branches and open PRs (see [Bot PAT](#bot-pat-one-secret-for-all-pr-bots)).
-4. For issue bot: create label **`agent`** and open issues you want automated (keep scope small).
-5. Optional: branch protection requiring **PR Check** before merge.
+4. For issue bot: create labels **`agent`** and (optional) **`automerge`** on issues you want fully automated.
+5. Optional: branch protection requiring **PR Check** before merge (PAT user must satisfy or bypass rules).
 
 ## Bot PAT (one secret for all PR bots)
 
@@ -162,6 +181,6 @@ Bots do not chain automatically (test-bot does not wake docs-bot). Use schedules
 | Update all docs from code | Partial | Docs bot syncs app catalog tables; deep rewrites need review |
 | CVE → issue | Yes | Trivy filesystem scan; dev dependency noise possible |
 | Fix issues end-to-end | Best-effort (v2) | Issue bot opens PR; keep issues scoped to docs/small changes |
-| Review + merge PR | Review only | Comments and checklist; **you** merge |
+| Review + merge PR | Review + optional merge | With **`automerge`** on the issue: merge when green; else **you** merge |
 
 Hugging Face Jobs can run batch Python but do not replace GitHub for issues/PRs — keep orchestration in Actions.
