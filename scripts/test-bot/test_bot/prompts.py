@@ -12,7 +12,9 @@ Rules:
 - Keep tests fast and deterministic — no sleeps, no network.
 - Python: use pytest and unittest.mock.
 - Node: use node:test and node:assert/strict; ESM imports with .js extensions for local modules.
-- Go: use testing package in the same package.
+- Go: package main tests in the same directory; test pure helpers (e.g. parseSentimentResponse) with []byte fixtures.
+- Go: do NOT invent custom HTTP client types — use net/http/httptest.Server and assign to sentimentClient.http, or only test parsers without network.
+- Go: every import must be used; run go test mentally before answering.
 - TypeScript: use node:test with tsx-compatible imports; mock fetch with global stubs if needed.
 - Do not add explanations outside the code fence.
 """
@@ -22,6 +24,8 @@ def build_user_prompt(
     target: Target,
     source_code: str,
     example_test: str | None,
+    *,
+    fix_error: str | None = None,
 ) -> str:
     lines = [
         f"Language: {target.language}",
@@ -41,6 +45,16 @@ def build_user_prompt(
                 "Example test from the same app (match style):",
                 "```",
                 example_test.strip(),
+                "```",
+            ]
+        )
+    if fix_error:
+        lines.extend(
+            [
+                "",
+                "Previous attempt failed to compile or pass tests. Fix it:",
+                "```",
+                fix_error.strip()[:8000],
                 "```",
             ]
         )

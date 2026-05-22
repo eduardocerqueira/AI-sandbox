@@ -7,7 +7,8 @@ Automated agent that discovers source files without unit tests in CI-covered app
 1. **Discover** — scan `apps/python`, `apps/node`, `apps/go`, and `apps/typescript` apps listed in CI (skip `_template` and entry/UI-only files).
 2. **Generate** — call OpenAI (`OPENAI_API_KEY`) to write one test file per target (mocked APIs, no live HF calls).
 3. **Verify** — run `pytest`, `npm test`, or `go test` for each affected app.
-4. **PR** — commit on `test-bot/<timestamp>` and open a PR with `gh`.
+4. **Verify** — run the app’s test suite after each file; on failure, retry once with compiler output, then skip that file.
+5. **PR** — commit only passing tests on `test-bot/<timestamp>` and open a PR with `gh`.
 
 ## Run locally
 

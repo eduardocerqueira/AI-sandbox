@@ -27,7 +27,10 @@ def _find_example_test(target: Target) -> str | None:
         for path in sorted((target.app_dir / "src").glob("*.test.js")):
             return path.read_text(encoding="utf-8")
     if target.language == "go":
+        out_stem = target.test_path.stem
         for path in sorted(target.app_dir.glob("*_test.go")):
+            if path.stem == out_stem:
+                continue
             return path.read_text(encoding="utf-8")
     if target.language == "typescript":
         for path in sorted((target.app_dir / "src").rglob("*.test.ts")):
@@ -42,7 +45,7 @@ def extract_code_block(text: str) -> str:
     return text.strip()
 
 
-def generate_test_content(target: Target) -> str:
+def generate_test_content(target: Target, *, fix_error: str | None = None) -> str:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not set")
@@ -59,7 +62,9 @@ def generate_test_content(target: Target) -> str:
             {"role": "system", "content": SYSTEM_PROMPT},
             {
                 "role": "user",
-                "content": build_user_prompt(target, source_code, example),
+                "content": build_user_prompt(
+                    target, source_code, example, fix_error=fix_error
+                ),
             },
         ],
     )
