@@ -6,9 +6,8 @@ Automated agent that discovers source files without unit tests in CI-covered app
 
 1. **Discover** — scan `apps/python`, `apps/node`, `apps/go`, and `apps/typescript` apps listed in CI (skip `_template` and entry/UI-only files).
 2. **Generate** — call OpenAI (`OPENAI_API_KEY`) to write one test file per target (mocked APIs, no live HF calls).
-3. **Verify** — run `pytest`, `npm test`, or `go test` for each affected app.
-4. **Verify** — run the app’s test suite after each file; on failure, retry once with compiler output, then skip that file.
-5. **PR** — commit only passing tests on `test-bot/<timestamp>` and open a PR with `gh`.
+3. **Verify** — run the app’s test suite after each file; on failure, retry once with compiler output, then skip that file.
+4. **PR** — commit only passing tests on `test-bot/<timestamp>`, push, then open a PR (`gh` locally; workflow step in CI).
 
 ## Run locally
 
@@ -41,6 +40,16 @@ Workflow: [`.github/workflows/test-bot.yml`](../../.github/workflows/test-bot.ym
 - **Secret:** `OPENAI_API_KEY` (repository secret)
 
 Inputs: `max_targets` (default 2), `dry_run` (default false).
+
+### Pull request permissions
+
+`GITHUB_TOKEN` can only open PRs if the repo allows it:
+
+**Settings → Actions → General → Workflow permissions** — use **Read and write**, and enable **Allow GitHub Actions to create and approve pull requests**.
+
+If your org blocks that, add optional secret **`TEST_BOT_GH_TOKEN`** (fine-grained PAT with **Contents** and **Pull requests** write on this repo). The workflow uses it for `gh pr create` when set.
+
+The test bot pushes its branch in the main step; a follow-up workflow step opens the PR so failures surface with a clear error instead of inside the Python traceback.
 
 ## Adding a new CI app
 

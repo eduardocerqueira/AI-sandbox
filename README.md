@@ -55,7 +55,7 @@ cp -r apps/python/_template apps/python/my-experiment
 
 Details: [docs/getting-started.md](docs/getting-started.md) · [CONTRIBUTING.md](CONTRIBUTING.md).
 
-**CI:** PR checks and nightly tests run in GitHub Actions. The [test bot](scripts/test-bot/README.md) can open PRs with generated unit tests (requires `OPENAI_API_KEY` secret).
+**CI:** PR checks and nightly tests in GitHub Actions. **Scheduled agents** (test, docs, CVE, issues, PR review): [docs/agents.md](docs/agents.md) — most need `OPENAI_API_KEY`.
 
 ## Documentation
 

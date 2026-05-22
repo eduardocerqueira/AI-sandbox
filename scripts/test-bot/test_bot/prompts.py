@@ -12,6 +12,7 @@ Rules:
 - Keep tests fast and deterministic — no sleeps, no network.
 - Python: use pytest and unittest.mock.
 - Node: use node:test and node:assert/strict; ESM imports with .js extensions for local modules.
+- Node: prefer testing pure helpers (e.g. getConfig) with env setup/teardown. If code calls process.exit(), stub it to throw (do not expect a normal Error from assert.throws on that path). Stub console.error when asserting messages printed to stderr.
 - Go: package main tests in the same directory; test pure helpers (e.g. parseSentimentResponse) with []byte fixtures.
 - Go: do NOT invent custom HTTP client types — use net/http/httptest.Server and assign to sentimentClient.http, or only test parsers without network.
 - Go: every import must be used; run go test mentally before answering.

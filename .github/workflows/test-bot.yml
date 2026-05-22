@@ -53,6 +53,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Run test bot
+        id: test-bot
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           TEST_BOT_MAX_TARGETS: ${{ inputs.max_targets || '2' }}
@@ -65,3 +66,24 @@ jobs:
             exit 1
           fi
           test-bot --max-targets "${TEST_BOT_MAX_TARGETS}" ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Create pull request
+        if: ${{ !inputs.dry_run && steps.test-bot.outputs.branch != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.TEST_BOT_GH_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ steps.test-bot.outputs.pr_body }}
+        run: |
+          set -euo pipefail
+          body_file="${RUNNER_TEMP}/test-bot-pr-body.md"
+          printf '%s\n' "$PR_BODY" > "$body_file"
+          if gh pr create \
+            --title "test-bot: add unit tests" \
+            --body-file "$body_file" \
+            --head "${{ steps.test-bot.outputs.branch }}" \
+            --base "${{ github.event.repository.default_branch }}"; then
+            echo "Opened pull request for branch ${{ steps.test-bot.outputs.branch }}"
+          else
+            echo "::error::Could not create pull request. Enable Settings → Actions → General → \"Allow GitHub Actions to create and approve pull requests\", or add repository secret TEST_BOT_GH_TOKEN (fine-grained PAT with Contents and Pull requests write)."
+            echo "Branch was pushed: ${{ steps.test-bot.outputs.branch }}"
+            exit 1
+          fi

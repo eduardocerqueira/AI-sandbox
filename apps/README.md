@@ -27,3 +27,6 @@ Each subdirectory is a **language workspace**. Projects are sibling folders insi
 ## Creating a project
 
 See [../docs/getting-started.md](../docs/getting-started.md) and [../CONTRIBUTING.md](../CONTRIBUTING.md).
+
+<!-- docs-bot:start -->
+<!-- docs-bot:end -->
