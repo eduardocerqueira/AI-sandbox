@@ -15,6 +15,26 @@ Automation that runs **at least once per week** (staggered cron) or on demand. S
 
 Manual run: **Actions** → pick workflow → **Run workflow**.
 
+## Architecture
+
+```mermaid
+flowchart TD
+    A[docs-bot] -->|workflow_dispatch| B[PR]
+    A -->|cron| C[Issue]
+    D[CVE scan] -->|cron| E[Issue]
+    F[issue-bot] -->|label agent| G[Plan]
+    G -->|implementation PR| H[PR Check]
+    H -->|PR steward| I[Comment]
+    J[PR steward] -->|human merge| K[PR]
+    L[Test bot] -->|cron| M[PR]
+    N[Experiment agent] -->|issue| O[Work]
+    O -->|PR| P[Close on merge]
+    Q[Triggers] -->|cron| A
+    Q -->|workflow_dispatch| F
+    Q -->|issues labeled agent| F
+    Q -->|workflow_run| H
+```
+
 ## Agent reference
 
 ### Docs bot

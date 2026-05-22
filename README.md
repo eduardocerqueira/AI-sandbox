@@ -71,3 +71,15 @@ Details: [docs/getting-started.md](docs/getting-started.md) · [CONTRIBUTING.md]
 ## Why this exists
 
 Learning AI tooling is easier with **working code you can grep**, not slide decks alone. This repo is a public scratchpad: small apps, honest READMEs, and a curated doc trail — useful to me, open to anyone skimming for patterns.
+
+## Simplified Architecture
+
+```mermaid
+flowchart TD
+    A[Scheduled Bots] -->|Cron| B[PR Check]
+    A -->|Workflow Dispatch| C[PR Steward]
+    D[Triggers] -->|Scheduled| A
+    D -->|PR Triggered| B
+    D -->|Auto-Approve| C
+    E[For full details, see] -->|[docs/agents.md]| F[Documentation]
+```
