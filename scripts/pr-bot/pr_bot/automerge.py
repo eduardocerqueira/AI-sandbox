@@ -21,10 +21,19 @@ def _gh(args: list[str]) -> str:
 
 
 def closes_issue_number(pr_body: str | None) -> int | None:
+    """Resolve linked issue from PR body (GitHub keywords + issue-bot phrasing)."""
     if not pr_body:
         return None
-    match = re.search(r"(?:closes|fixes|resolves)\s+#(\d+)", pr_body, re.I)
-    return int(match.group(1)) if match else None
+    patterns = (
+        r"(?:closes|fixes|resolves)\s+#(\d+)",
+        r"implements\s+#(\d+)",
+        r"merge\s+to\s+close\s+#(\d+)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, pr_body, re.I)
+        if match:
+            return int(match.group(1))
+    return None
 
 
 def issue_has_automerge(repo: str, issue_number: int) -> bool:

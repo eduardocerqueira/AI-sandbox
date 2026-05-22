@@ -62,6 +62,8 @@ def pr_body(issue_number: int, issue_title: str, summary: str, plan_excerpt: str
 
 {summary}
 
+Closes #{issue_number}
+
 Implements #{issue_number}: {issue_title}
 
 ## Plan (excerpt)
