@@ -67,13 +67,11 @@ def run_single_app(
         capture_output=True,
     )
     if result.returncode != 0:
-        detail = (result.stderr or "") + (result.stdout or "")
         raise subprocess.CalledProcessError(
             result.returncode,
             cmd,
-            output=detail,
+            output=result.stdout,
             stderr=result.stderr,
-            stdout=result.stdout,
         )
     print(f"Passed: {label}")
 
