@@ -58,11 +58,13 @@ def test_generate_and_verify_success_first_try(
     writes: list[str] = []
 
     monkeypatch.setattr(main_mod, "generate_test_content", lambda _target, fix_error=None: "ok\n")
-    monkeypatch.setattr(
-        main_mod,
-        "write_test_file",
-        lambda t, c, dry_run: (t.test_path.parent.mkdir(parents=True, exist_ok=True), t.test_path.write_text(c, encoding="utf-8"), writes.append(c)),
-    )
+
+    def _fake_write(t: Target, c: str, *, dry_run: bool) -> None:
+        t.test_path.parent.mkdir(parents=True, exist_ok=True)
+        t.test_path.write_text(c, encoding="utf-8")
+        writes.append(c)
+
+    monkeypatch.setattr(main_mod, "write_test_file", _fake_write)
     monkeypatch.setattr(main_mod, "_run_tests_for_target", lambda _target: None)
 
     assert main_mod._generate_and_verify(target, max_attempts=2) is True
@@ -108,18 +110,16 @@ def test_generate_and_verify_cleans_up_failed_file(
     target = _target(tmp_path)
 
     monkeypatch.setattr(main_mod, "generate_test_content", lambda _target, fix_error=None: "bad\n")
-    monkeypatch.setattr(
-        main_mod,
-        "write_test_file",
-        lambda t, c, dry_run: (t.test_path.parent.mkdir(parents=True, exist_ok=True), t.test_path.write_text(c, encoding="utf-8")),
-    )
-    monkeypatch.setattr(
-        main_mod,
-        "_run_tests_for_target",
-        lambda _target: (_ for _ in ()).throw(
-            subprocess.CalledProcessError(1, ["pytest"], output="out", stderr="err")
-        ),
-    )
+
+    def _fake_write(t: Target, c: str, *, dry_run: bool) -> None:
+        t.test_path.parent.mkdir(parents=True, exist_ok=True)
+        t.test_path.write_text(c, encoding="utf-8")
+
+    def _always_fail(_target: Target) -> None:
+        raise subprocess.CalledProcessError(1, ["pytest"], output="out", stderr="err")
+
+    monkeypatch.setattr(main_mod, "write_test_file", _fake_write)
+    monkeypatch.setattr(main_mod, "_run_tests_for_target", _always_fail)
 
     assert main_mod._generate_and_verify(target, max_attempts=2) is False
     assert not target.test_path.exists()

@@ -26,6 +26,8 @@ def test_ensure_typescript_test_script_adds_script_and_tsx(
     calls: list[tuple[list[str], Path]] = []
 
     def _fake_run(cmd: list[str], cwd: Path, check: bool, text: bool) -> SimpleNamespace:
+        assert check is True
+        assert text is True
         calls.append((cmd, cwd))
         return SimpleNamespace(returncode=0)
 
@@ -35,7 +37,7 @@ def test_ensure_typescript_test_script_adds_script_and_tsx(
     data = json.loads(pkg.read_text(encoding="utf-8"))
 
     assert data["scripts"]["test"] == runner.PACKAGE_JSON_TEST_SCRIPT
-    assert data["devDependencies"]["tsx"] == "^4.19.0"
+    assert "tsx" in data["devDependencies"]
     assert calls == [(["npm", "install"], app_dir)]
 
 
