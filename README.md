@@ -55,7 +55,7 @@ cp -r apps/python/_template apps/python/my-experiment
 
 Details: [docs/getting-started.md](docs/getting-started.md) · [CONTRIBUTING.md](CONTRIBUTING.md).
 
-**CI:** PR checks and nightly tests in GitHub Actions. **Scheduled agents** (test, docs, CVE, issues, PR review): [docs/agents.md](docs/agents.md) — most need `OPENAI_API_KEY`.
+**CI:** PR checks and nightly tests in GitHub Actions. **Scheduled agents** (test, docs, CVE, issues, PR review, experiments): [docs/agents.md](docs/agents.md) — most need `OPENAI_API_KEY`.
 
 ## Documentation
 

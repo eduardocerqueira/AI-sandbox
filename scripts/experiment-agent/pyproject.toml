@@ -1,0 +1,19 @@
+[project]
+name = "ai-sandbox-experiment-agent"
+version = "0.1.0"
+description = "Docs-guided experiments: proposal issue, work, PR, close on merge"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "openai>=1.40.0",
+]
+
+[project.scripts]
+experiment-agent = "experiment_agent.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["experiment_agent"]

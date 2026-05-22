@@ -11,6 +11,7 @@ Automation that runs **at least once per week** (staggered cron) or on demand. S
 | [Issue worker](../scripts/issue-bot/README.md) | [`issue-bot.yml`](../.github/workflows/issue-bot.yml) | Fri 08:00 | `OPENAI_API_KEY` | PR (label `agent`) |
 | [PR steward](../scripts/pr-bot/README.md) | [`pr-bot.yml`](../.github/workflows/pr-bot.yml) | Sat 08:00 + on PR events | `OPENAI_API_KEY` (optional) | Comment |
 | Test bot | [`test-bot.yml`](../.github/workflows/test-bot.yml) | Sun 07:00 | `OPENAI_API_KEY` | PR |
+| [Experiment agent](../scripts/experiment-agent/README.md) | [`experiment-agent.yml`](../.github/workflows/experiment-agent.yml) | Odd days 08:00 | `OPENAI_API_KEY` | Issue + PR |
 
 Manual run: **Actions** → pick workflow → **Run workflow**.
 
@@ -50,9 +51,17 @@ Fork PRs: in **Settings → Actions → General**, you can set fork workflows to
 | **PR Check** | Yes — every `pull_request` |
 | **PR steward** | Yes — after **PR Check** completes (`workflow_run`; no approval gate) |
 | **Auto-approve** | Yes — unblocks other workflows awaiting maintainer on PR open/update |
-| test-bot, docs-bot, CVE scan, issue-bot | No — cron or manual only |
+| test-bot, docs-bot, CVE scan, issue-bot, experiment-agent | No — cron or manual only |
 
 Bots do not chain automatically (test-bot does not wake docs-bot). Use schedules or run workflows manually.
+
+## Experiment agent lifecycle
+
+1. **Proposal** — opens an issue (`experiment-agent` + `agent-in-progress`) describing the topic from [docs/](.).
+2. **Work** — adds `docs/experiments/*.md` or scaffolds `apps/python/<slug>/`, runs `pytest` for code.
+3. **PR** — branch `experiment-agent/…`, body includes `Closes #<issue>`.
+4. **Review** — PR Check + PR steward (same as other PRs).
+5. **Close** — [`experiment-agent-close.yml`](../.github/workflows/experiment-agent-close.yml) closes the issue when the PR merges.
 
 ## Limits (honest)
 
