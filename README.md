@@ -65,6 +65,7 @@ Details: [docs/getting-started.md](docs/getting-started.md) · [CONTRIBUTING.md]
 | **Agent skills** | [docs/skills.md](docs/skills.md) |
 | **Experiment ideas** | [docs/experiment-ideas.md](docs/experiment-ideas.md) |
 | **Courses & certs** | [docs/learning-resources.md](docs/learning-resources.md) |
+| **Scheduled agents** | [docs/agents.md](docs/agents.md) — test-bot, docs-bot, CVE scan, issue-bot, PR steward, experiment-agent |
 | **All docs** | [docs/README.md](docs/README.md) |
 
 ## Why this exists
