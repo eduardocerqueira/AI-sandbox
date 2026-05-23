@@ -4,3 +4,4 @@ Research notes and write-ups produced by [experiment-agent](../scripts/experimen
 
 New entries are linked here automatically when the agent adds a doc.
 - [mcp-server-basics](experiments/mcp-server-basics.md) — MCP Server Basics
+- [mcp-server-advanced-features](experiments/mcp-server-advanced-features.md) — MCP Server Advanced Features
